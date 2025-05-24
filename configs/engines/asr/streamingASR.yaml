@@ -1,0 +1,38 @@
+# Configuration for the Streaming Automatic Speech Recognition Engine
+ENGINE:
+  NAME: "StreamingASR"           # Must match the class name registered in the factory and the decorator
+  MODEL_TYPE: "normal"            # "normal" for ModelScope pipeline, "onnx" for FunASR ONNX
+                                  # Change to "onnx" to use the ONNX version by default
+
+  # Paths and revisions for the 'normal' ModelScope Paraformer streaming model
+  MODEL_PATH_NORMAL: "iic/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-online"
+  MODEL_REVISION_NORMAL: "v2.0.4"
+
+  # Paths and revisions for the 'onnx' FunASR Paraformer streaming model
+  # MODEL_PATH_ONNX can be a ModelScope model ID (which would be downloaded to cache)
+  # or a direct local path to the ONNX model directory.
+  MODEL_PATH_ONNX: "iic/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-online-onnx"
+  MODEL_REVISION_ONNX: "v1.1.2" # Specify tag/commit if using ModelScope ID for ONNX model
+
+  # Configuration for internal chunking and model parameters
+  CHUNK_CONFIG:
+    NORMAL_MODEL:
+      # STRIDE_SIZE_MS: Duration of audio (in milliseconds) that the ModelScope pipeline processes in one inference call.
+      # Example: Paraformer model with chunk_size=[8,8,4] (frames) and 60ms per frame for chunk_size[1] => 8*60ms = 480ms.
+      STRIDE_SIZE_MS: 480
+      CHUNK_KWARGS: # Keyword arguments passed directly to the ModelScope pipeline's __call__ method
+        encoder_chunk_look_back: 4  # Number of frames for encoder look-back
+        decoder_chunk_look_back: 1  # Number of frames for decoder look-back
+
+    ONNX_MODEL:
+      # STRIDE_SIZE_MS: Duration of audio (in milliseconds) that the FunASR ONNX model processes in one inference call.
+      # Example: Paraformer ONNX model with chunk_size=[8,8,4] (frames) and 60ms per frame for chunk_size[1] => 8*60ms = 480ms.
+      STRIDE_SIZE_MS: 480
+      CONSTRUCTOR_ARGS: # Arguments for the funasr_onnx.Paraformer constructor
+        # CHUNK_SIZE is a list of integers, e.g., [encoder_chunk_samples, decoder_chunk_samples, ctc_chunk_samples]
+        # These are specific to the ONNX model's frame definition (e.g., number of 10ms frames).
+        # The example code for funasr_onnx used [8,8,4].
+        CHUNK_SIZE: [8, 8, 4]
+        BATCH_SIZE: 1             # Batch size for ONNX model inference (usually 1 for streaming)
+        QUANTIZE: True            # Whether to use quantized ONNX model
+        INTRA_OP_NUM_THREADS: 4   # Number of threads for intra-op parallelism

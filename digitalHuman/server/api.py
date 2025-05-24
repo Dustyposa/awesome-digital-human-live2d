@@ -9,6 +9,7 @@ from .asrApi import router as asrRouter
 from .agentApi import router as agentRouter
 from .llmApi import router as llmRouter
 from .ttsApi import router as ttsRouter
+from .asrStreamApi import router as asrStreamRouter # Added
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -34,3 +35,4 @@ app.include_router(asrRouter, prefix="/adh/asr", tags=["ASR"])
 app.include_router(llmRouter, prefix="/adh/llm", tags=["LLM"])
 app.include_router(ttsRouter, prefix="/adh/tts", tags=["TTS"])
 app.include_router(agentRouter, prefix="/adh/agent", tags=["AGENT"])
+app.include_router(asrStreamRouter, prefix="/adh/ws/asr", tags=["ASR Streaming"]) # Added
