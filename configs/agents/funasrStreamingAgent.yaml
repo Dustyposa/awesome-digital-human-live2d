@@ -1,0 +1,9 @@
+# FunASR Streaming Agent Configuration
+# Agent 名称
+NAME: FunasrStreamingAgent
+# 使用的引擎类型 (ASR, LLM, TTS)
+ENGINE_TYPE: ASR
+# 具体使用的引擎名称 (对应引擎配置文件中的 NAME)
+ENGINE_NAME: FunasrStreamingASR
+# Agent 可能需要的其他参数 (此Agent目前不需要额外参数)
+# PARAMETERS: []
