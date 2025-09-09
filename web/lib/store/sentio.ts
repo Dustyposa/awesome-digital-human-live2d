@@ -1,7 +1,9 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from 'zustand/middleware'
-import { ResourceModel, ChatMessage, CHAT_MODE, APP_TYPE, IFER_TYPE } from '@/lib/protocol';
+import { ResourceModel, ChatMessage, CHAT_MODE, APP_TYPE, IFER_TYPE, RESOURCE_TYPE } from '@/lib/protocol';
 import * as CONSTANTS from '@/lib/constants';
+import { getSrcPath } from '@/lib/path';
+import { BACKGROUND_TYPE } from '@/lib/protocol';
 
 // ==================== 聊天记录 ==================
 interface SentioChatRecordState {
@@ -153,14 +155,24 @@ interface SentioBackgroundState {
     background: ResourceModel | null,
     setBackground: (background: ResourceModel | null) => void
 }
+
+// 默认背景设置
+const DEFAULT_BACKGROUND: ResourceModel = {
+    resource_id: 'DYNAMIC_几何线条.mp4',
+    type: RESOURCE_TYPE.BACKGROUND,
+    sub_type: BACKGROUND_TYPE.DYNAMIC,
+    name: '几何线条',
+    link: getSrcPath(`${CONSTANTS.SENTIO_BACKGROUND_DYNAMIC_PATH}/几何线条.mp4`)
+};
+
 export const useSentioBackgroundStore = create<SentioBackgroundState>()(
     persist(
-        (set) => ({
-            background: null,
+        (set, get) => ({
+            background: DEFAULT_BACKGROUND,
             setBackground: (by: ResourceModel | null) => set((state) => ({ background: by })),
         }),
         {
-            name: 'sentio-background-storage',
+            name: 'sentio-background-storage-v2',
         }
     )
 )

@@ -13,6 +13,12 @@ export function Live2d() {
     const { ready } = useLive2D();
     const { background } = useSentioBackgroundStore();
 
+    // 调试信息
+    useEffect(() => {
+        console.log('Background state:', background);
+        console.log('Live2D ready state:', ready);
+    }, [background, ready]);
+
     const handleLoad = () => {
         if (LAppDelegate.getInstance().initialize() == false) {
             return;
@@ -52,7 +58,7 @@ export function Live2d() {
     }, []);
 
     return (
-        <div className='absolute top-0 left-0 w-full h-full z-0'>
+        <div className='absolute top-0 left-0 w-full h-full z-0' style={{ pointerEvents: 'none' }}>
             {
                 background && (background.link.endsWith('.mp4') ? 
                 <video 
@@ -79,7 +85,6 @@ export function Live2d() {
             }
             <canvas
                 id="live2dCanvas"
-                // ref={canvasRef}
                 className='w-full h-full bg-center bg-cover'
             />
         </div>   

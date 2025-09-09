@@ -104,7 +104,6 @@ export function useAppConfig() {
         setTtsEnable(true);
         resetAppEngine();
         clearChatRecord();
-        setBackground(null);
         setCharacter(null);
         setSound(true);
         setShowThink(true);
