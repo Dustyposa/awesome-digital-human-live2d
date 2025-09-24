@@ -31,6 +31,7 @@ export const ChatInput = memo(({
     const { enable: enableASR, engine: asrEngine, settings: asrSettings } = useSentioAsrStore();
     const { chat, abort, chatting } = useChatWithAgent();
     const { startAudioTimer, stopAudioTimer } = useAudioTimer();
+    
     const handleStartRecord = () => {
         abort();
         if (micRecoder == null) {
@@ -56,22 +57,51 @@ export const ChatInput = memo(({
     }
 
     const handleStopRecord = async () => {
-        micRecoder.stop();
-        setStartMicRecord(false);
-        if (!stopAudioTimer()) return;
-        // 开始做语音识别
-        setMessage(t('speech2text'));
-        setStartAsrConvert(true);
-        // 获取mp3数据, 转mp3的计算放到web客户端, 后端拿到的是mp3数据
-        const mp3Blob = convertToMp3(micRecoder);
-        let asrResult = "";
-        asrResult = await api_asr_infer_file(asrEngine, asrSettings, mp3Blob);
-        if (asrResult.length > 0) {
-            setMessage(asrResult);
-        } else {
-            setMessage("");
+        if (micRecoder) {
+            micRecoder.stop();
+            setStartMicRecord(false);
+            if (!stopAudioTimer()) return;
+            // 开始做语音识别
+            setMessage(t('speech2text'));
+            setStartAsrConvert(true);
+            // 获取mp3数据, 转mp3的计算放到web客户端, 后端拿到的是mp3数据
+            const mp3Blob = convertToMp3(micRecoder);
+            let asrResult = "";
+            asrResult = await api_asr_infer_file(asrEngine, asrSettings, mp3Blob);
+            if (asrResult.length > 0) {
+                setMessage(asrResult);
+            } else {
+                setMessage("");
+            }
+            setStartAsrConvert(false);
         }
-        setStartAsrConvert(false);
+    }
+
+    // 按住录音的处理函数
+    const handleMouseDown = () => {
+        if (enableASR) {
+            handleStartRecord();
+        }
+    }
+
+    const handleMouseUp = () => {
+        if (startMicRecord) {
+            handleStopRecord();
+        }
+    }
+
+    const handleTouchStart = (e: React.TouchEvent) => {
+        e.preventDefault();
+        if (enableASR) {
+            handleStartRecord();
+        }
+    }
+
+    const handleTouchEnd = (e: React.TouchEvent) => {
+        e.preventDefault();
+        if (startMicRecord) {
+            handleStopRecord();
+        }
     }
 
     const onFileClick = () => {
@@ -118,15 +148,20 @@ export const ChatInput = memo(({
                                 "focus:outline-none",
                                 startMicRecord ? "text-red-500" : enableASR ? "hover:text-green-500" : "hover:text-gray-500"
                             )}
+                            onMouseDown={handleMouseDown}
+                            onMouseUp={handleMouseUp}
+                            onMouseLeave={handleMouseUp}
+                            onTouchStart={handleTouchStart}
+                            onTouchEnd={handleTouchEnd}
                         >
                             {startMicRecord ? (
-                                <StopCircleIcon className='size-6' onClick={handleStopRecord} />
+                                <StopCircleIcon className='size-6' />
                             ) : (
                                 startAsrConvert ? (
                                     <Spinner size="sm" />
                                 ) : (
-                                    <Tooltip className='opacity-90' content="Ctrl + M">
-                                        <MicrophoneIcon className='size-6' onClick={handleStartRecord} />
+                                    <Tooltip className='opacity-90' content="按住录音">
+                                        <MicrophoneIcon className='size-6' />
                                     </Tooltip>
                                 )
                             )}
